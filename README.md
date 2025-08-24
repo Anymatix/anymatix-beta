@@ -3,14 +3,16 @@ Anymatix Beta
 
 macOS (Apple Silicon)
 ---------------------
-Download the bundle zip from this repository's Releases page:
-https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.1/anymatix-1.0.0-beta.1-bundle.zip
 
 The app is not signed yet, so we need to use a script to remove the quarantine flag.
 
-Install (2 steps):
 
-1. Open terminal and copy paste:
+1. Click to download:
+
+https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.1/anymatix-1.0.0-beta.1-bundle.zip
+
+
+2. Open terminal and copy paste:
 	```
 	cd ~/Downloads && unzip -o anymatix-1.0.0-beta.1-bundle.zip && bash ./install.sh
 	```
