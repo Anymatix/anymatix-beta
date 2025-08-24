@@ -9,7 +9,7 @@ The app is not signed yet, so we need to use a script to remove the quarantine f
 
 1. Click to download:
 
-https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.1/anymatix-1.0.0-beta.1-bundle.zip
+	https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.1/anymatix-1.0.0-beta.1-bundle.zip
 
 
 2. Open terminal and copy paste:
