@@ -1,8 +1,6 @@
 Anymatix Beta
 =============
 
-Public beta downloads (latest artifacts copied here by CI):
-
 macOS (Apple Silicon)
 ---------------------
 Download the bundle zip from this repository's Releases page:
