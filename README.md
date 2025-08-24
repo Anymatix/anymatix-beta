@@ -11,10 +11,11 @@ The app is not signed yet, so we need to use a script to remove the quarantine f
 Install (2 steps):
 
 1. Open terminal and copy paste:
+	```
 	cd ~/Downloads && unzip -o anymatix-*-bundle.zip && bash ./install.sh
 	```
  
-2. When the DMG opens, drag Anymatix to Applications (first launch: right‑click > Open if Gatekeeper warns).
+3. When the DMG opens, drag Anymatix to Applications (first launch: right‑click > Open if Gatekeeper warns).
 
 Windows
 -------
