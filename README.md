@@ -12,7 +12,7 @@ Install (2 steps):
 
 1. Open terminal and copy paste:
 	```
-	cd ~/Downloads && unzip -o anymatix-*-bundle.zip && bash ./install.sh
+	cd ~/Downloads && unzip -o anymatix-1.0.0-beta.1-bundle.zip && bash ./install.sh
 	```
  
 3. When the DMG opens, drag Anymatix to Applications (first launch: right‑click > Open if Gatekeeper warns).
