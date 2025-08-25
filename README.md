@@ -1,6 +1,15 @@
 Anymatix Beta
 =============
 
+Windows
+-------
+Download the setup executable from:
+https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.1/anymatix-1.0.0-beta.1-setup.exe
+
+Install (2 steps):
+1. Run the EXE
+2. If SmartScreen warns, More info -> Run anyway (first time only)
+
 macOS (Apple Silicon)
 ---------------------
 
@@ -19,11 +28,3 @@ The app is not signed yet, so we need to use a script to remove the quarantine f
  
 3. When the DMG opens, drag Anymatix to Applications (first launch: right‑click > Open if Gatekeeper warns).
 
-Windows
--------
-Download the setup executable from:
-https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.1/anymatix-1.0.0-beta.1-setup.exe
-
-Install (2 steps):
-1. Run the EXE
-2. If SmartScreen warns, More info -> Run anyway (first time only)
