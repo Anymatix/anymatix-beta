@@ -27,11 +27,3 @@ https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.1/anymat
 Install (2 steps):
 1. Run the EXE
 2. If SmartScreen warns, More info -> Run anyway (first time only)
-
-Updates
--------
-Re-download the new release and repeat the same steps; user data persists.
-
-
-Nothing else is required.
-
