@@ -1,12 +1,11 @@
 {
-  "name": "anymatix-beta-readme-generator",
-  "version": "1.0.0",
-  "description": "README generator for anymatix-beta releases",
-  "scripts": {
-    "generate-readme": "node generate-readme.js",
-    "generate-readme:bash": "bash generate-readme.sh"
-  },
-  "engines": {
-    "node": ">=14.0.0"
-  }
+    "name": "anymatix-beta-readme-generator",
+    "version": "1.0.0",
+    "description": "README generator for anymatix-beta releases",
+    "scripts": {
+        "generate-readme": "node generate-readme.js"
+    },
+    "engines": {
+        "node": ">=14.0.0"
+    }
 }

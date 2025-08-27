@@ -3,23 +3,23 @@
 const fs = require('fs');
 const path = require('path');
 
-// Script to generate README.md from template using COMFYUI_VERSION.txt from main repo
+// Script to generate README.md from template using the main app version from package.json
 // This ensures the README always reflects the correct version for releases
 
 const scriptDir = __dirname;
 const betaRepoDir = scriptDir;
 const mainRepoDir = path.resolve(scriptDir, '../../');
-const comfyuiVersionFile = path.join(mainRepoDir, 'app', 'COMFYUI_VERSION.txt');
+const packageJsonFile = path.join(mainRepoDir, 'app', 'package.json');
 const templateFile = path.join(betaRepoDir, 'README.template.md');
 const outputFile = path.join(betaRepoDir, 'README.md');
 
 console.log('Beta repo directory:', betaRepoDir);
 console.log('Main repo directory:', mainRepoDir);
-console.log('COMFYUI version file:', comfyuiVersionFile);
+console.log('Package.json file:', packageJsonFile);
 
-// Check if COMFYUI_VERSION.txt exists
-if (!fs.existsSync(comfyuiVersionFile)) {
-    console.error(`Error: COMFYUI_VERSION.txt not found at ${comfyuiVersionFile}`);
+// Check if package.json exists
+if (!fs.existsSync(packageJsonFile)) {
+    console.error(`Error: package.json not found at ${packageJsonFile}`);
     process.exit(1);
 }
 
@@ -29,11 +29,12 @@ if (!fs.existsSync(templateFile)) {
     process.exit(1);
 }
 
-// Read the version from COMFYUI_VERSION.txt (trim whitespace)
-const version = fs.readFileSync(comfyuiVersionFile, 'utf8').trim();
+// Read the version from package.json
+const packageJson = JSON.parse(fs.readFileSync(packageJsonFile, 'utf8'));
+const version = packageJson.version;
 
 if (!version) {
-    console.error(`Error: Version is empty in ${comfyuiVersionFile}`);
+    console.error(`Error: Version is missing in ${packageJsonFile}`);
     process.exit(1);
 }
 
