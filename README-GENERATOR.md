@@ -24,34 +24,42 @@ npm run generate-readme
 ### Using Node.js directly
 ```bash
 cd submodules/anymatix-beta
+````markdown
+# README generator (concise)
+
+Generates `README.md` from `README.template.md` by replacing `{{VERSION}}` with the version read from the main app's `package.json`.
+
+Files
+- `generate-readme.js` — generator script
+- `README.template.md` — template with `{{VERSION}}`
+- `README.md` — generated output (do not edit)
+
+Quick usage
+
+- From the main repo:
+	- cd to this folder and run the npm script:
+
+```bash
+cd submodules/anymatix-beta
+npm run generate-readme
+```
+
+- Or run directly with Node:
+
+```bash
+cd submodules/anymatix-beta
 node generate-readme.js
 ```
 
-## How it works
+macOS one-liner
 
-1. Reads version from `../../app/package.json` (main repo)
-2. Loads `README.template.md`
-3. Replaces all `{{VERSION}}` placeholders with the actual version
-4. Writes the result to `README.md`
+This will download the repository ZIP from GitHub, extract the `anymatix-beta` subfolder, and run the generator (replace OWNER/REPO and TAG or use main):
 
-## Integration with Release Process
+```bash
+curl -sL https://github.com/OWNER/REPO/archive/refs/heads/main.zip | bsdtar -xvf- "REPO-main/submodules/anymatix-beta/*" -O | (cd /tmp && unzip -qq - && cd REPO-main/submodules/anymatix-beta && node generate-readme.js)
+```
 
-This script is automatically called by the main release script (`yarn release` in the main app) to ensure the README always has the correct download links and version references.
-
-The release script will:
-1. Generate the README with the correct version
-2. Commit and push the changes to the anymatix-beta repository
-3. Create and push the release tag
-
-## Template Variables
-
-Currently supported template variables:
-- `{{VERSION}}` - Replaced with the version from the main app's package.json
-
-## Error Handling
-
-The script will exit with an error if:
-- package.json is not found in the main repo
-- README.template.md is not found  
-- Version string is empty
-- File read/write permissions are insufficient
+Notes
+- The script expects `../../app/package.json` to exist when run inside the cloned repo. If running from a ZIP download, ensure the `app/package.json` is present or adjust the path.
+- The generator exits with non-zero code on missing files or empty version.
+````
