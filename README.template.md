@@ -5,14 +5,14 @@ Windows
 -------
 Open PowerShell (Start menu > PowerShell) and paste:
 ```
-curl -L https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe && Unblock-File anymatix-{{VERSION}}-setup.exe && .\anymatix-{{VERSION}}-setup.exe
+curl -LO https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe && Unblock-File anymatix-{{VERSION}}-setup.exe && .\anymatix-{{VERSION}}-setup.exe
 ```
 
 macOS
 -----
 Open Terminal and paste:
 ```
-curl -L https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-bundle.zip && unzip -o anymatix-{{VERSION}}-bundle.zip && bash ./install.sh
+curl -LO https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-bundle.zip && unzip -o anymatix-{{VERSION}}-bundle.zip && bash ./install.sh
 ```
 
 Longer explanation
