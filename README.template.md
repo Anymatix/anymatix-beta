@@ -12,7 +12,7 @@ macOS
 -----
 Open Terminal and paste:
 ```
-curl -L -o anymatix-bundle.zip https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-bundle.zip && unzip -o anymatix-bundle.zip && bash ./install.sh
+curl -LOC- https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}.dmg && xattr -d com.apple.quarantine anymatix-{{VERSION}}.dmg 2>/dev/null || true && open anymatix-{{VERSION}}.dmg
 ```
 
 Longer explanation
@@ -25,6 +25,6 @@ If you prefer to download manually:
 
 **Windows:** [anymatix-{{VERSION}}-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe)
 
-**macOS:** [anymatix-{{VERSION}}-bundle.zip](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-bundle.zip)
+**macOS:** [anymatix-{{VERSION}}.dmg](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}.dmg)
 
-After manual download, Windows users should run PowerShell as administrator and use `Unblock-File` on the downloaded file before running it. macOS users should extract the bundle and run the included install script.
+After manual download, Windows users should run PowerShell as administrator and use `Unblock-File` on the downloaded file before running it. macOS users should run `xattr -d com.apple.quarantine anymatix-{{VERSION}}.dmg` to remove quarantine flags before opening the DMG.
