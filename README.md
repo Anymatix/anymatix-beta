@@ -2,7 +2,7 @@ AnyWindows
 -------
 Open PowerShell (Start menu > PowerShell) and paste:
 ```
-curl -Uri "https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7/anymatix-1.0.0-beta.7-setup.exe" -OutFile "anymatix-setup.exe"; Unblock-File "anymatix-setup.exe"; .\anymatix-setup.exe
+curl -L https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7/anymatix-1.0.0-beta.7-setup.exe -o anymatix-setup.exe; Unblock-File anymatix-setup.exe; .\anymatix-setup.exe
 ```Beta
 =============
 
