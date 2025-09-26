@@ -5,7 +5,7 @@ Windows
 -------
 Open PowerShell (Start menu > PowerShell) and paste:
 ```
-Invoke-WebRequest -Uri "https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe" -OutFile "anymatix-setup.exe"; Unblock-File "anymatix-setup.exe"; .\anymatix-setup.exe
+curl -Uri "https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe" -OutFile "anymatix-setup.exe"; Unblock-File "anymatix-setup.exe"; .\anymatix-setup.exe
 ```
 
 macOS
