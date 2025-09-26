@@ -5,7 +5,7 @@ Windows
 -------
 Open PowerShell (Start menu > PowerShell) and paste:
 ```
-curl.exe -L --progress-bar "https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7/anymatix-1.0.0-beta.7-setup.exe" -o "anymatix-setup.exe"; Unblock-File "anymatix-setup.exe"; .\anymatix-setup.exe
+curl.exe -L --progress-bar -OJ "https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7/anymatix-1.0.0-beta.7-setup.exe"; $f=(Get-ChildItem -File "anymatix-*-setup.exe" | Sort-Object LastWriteTime -Desc | Select-Object -First 1).FullName; Unblock-File $f; & $f
 ```
 
 macOS
