@@ -5,7 +5,7 @@ Windows
 -------
 Open PowerShell (Start menu > PowerShell) and paste:
 ```
-curl -L -o anymatix-setup.exe https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7/anymatix-1.0.0-beta.7-setup.exe && Unblock-File anymatix-setup.exe && .\anymatix-setup.exe
+curl -L -o anymatix-setup.exe https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7/anymatix-1.0.0-beta.7-setup.exe; Unblock-File anymatix-setup.exe; .\anymatix-setup.exe
 ```
 
 macOS
