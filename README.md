@@ -5,14 +5,14 @@ Windows
 -------
 Open PowerShell (Start menu > PowerShell) and paste:
 ```
-curl -LO https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7/anymatix-1.0.0-beta.7-setup.exe && Unblock-File anymatix-1.0.0-beta.7-setup.exe && .\anymatix-1.0.0-beta.7-setup.exe
+curl -LOC- https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7/anymatix-1.0.0-beta.7-setup.exe && Unblock-File anymatix-1.0.0-beta.7-setup.exe && .\anymatix-1.0.0-beta.7-setup.exe
 ```
 
 macOS
 -----
 Open Terminal and paste:
 ```
-curl -LO https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7/anymatix-1.0.0-beta.7.dmg && xattr -d com.apple.quarantine anymatix-1.0.0-beta.7.dmg && open anymatix-1.0.0-beta.7.dmg
+curl -LOC- https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7/anymatix-1.0.0-beta.7.dmg && xattr -d com.apple.quarantine anymatix-1.0.0-beta.7.dmg 2>/dev/null || true && open anymatix-1.0.0-beta.7.dmg
 ```
 
 Longer explanation
