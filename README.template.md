@@ -5,7 +5,12 @@ Anymatix beta releases are unsigned, so you need to follow special instructions.
 
 Windows
 -------
-Open PowerShell (Start menu > PowerShell) and paste:
+
+**Windows:** [anymatix-{{VERSION}}-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe)
+
+and run anyway when prompted by Windows SmartScreen.
+
+Or open PowerShell (Start menu > PowerShell) and paste:
 ```
 curl.exe -L --progress-bar "https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe" -o "anymatix-{{VERSION}}-setup.exe"; Unblock-File "anymatix-{{VERSION}}-setup.exe"; .\anymatix-{{VERSION}}-setup.exe
 ```
