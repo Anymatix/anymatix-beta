@@ -1,18 +1,20 @@
 Anymatix Beta
 =============
 
+Anymatix beta releases are unsigned, so you need to follow special instructions. Manual download is anyway possible (see below).
+
 Windows
 -------
 Open PowerShell (Start menu > PowerShell) and paste:
 ```
-curl.exe -L --progress-bar "https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.2/anymatix-1.0.0-beta.7.2-setup.exe" -o "anymatix-1.0.0-beta.7.2-setup.exe"; Unblock-File "anymatix-1.0.0-beta.7.2-setup.exe"; .\anymatix-1.0.0-beta.7.2-setup.exe
+curl.exe -L --progress-bar "https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.3/anymatix-1.0.0-beta.7.3-setup.exe" -o "anymatix-1.0.0-beta.7.3-setup.exe"; Unblock-File "anymatix-1.0.0-beta.7.3-setup.exe"; .\anymatix-1.0.0-beta.7.3-setup.exe
 ```
 
 macOS
 -----
 Open Terminal and paste:
 ```
-curl -LOC- https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.2/anymatix-1.0.0-beta.7.2.dmg && xattr -d com.apple.quarantine anymatix-1.0.0-beta.7.2.dmg 2>/dev/null || true && open anymatix-1.0.0-beta.7.2.dmg
+curl -LOC- https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.3/anymatix-1.0.0-beta.7.3.dmg && xattr -d com.apple.quarantine anymatix-1.0.0-beta.7.3.dmg 2>/dev/null || true && open anymatix-1.0.0-beta.7.3.dmg
 ```
 
 Longer explanation
@@ -23,8 +25,8 @@ Manual download
 ---------------
 If you prefer to download manually:
 
-**Windows:** [anymatix-1.0.0-beta.7.2-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.2/anymatix-1.0.0-beta.7.2-setup.exe)
+**Windows:** [anymatix-1.0.0-beta.7.3-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.3/anymatix-1.0.0-beta.7.3-setup.exe)
 
-**macOS:** [anymatix-1.0.0-beta.7.2.dmg](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.2/anymatix-1.0.0-beta.7.2.dmg)
+**macOS:** [anymatix-1.0.0-beta.7.3.dmg](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.3/anymatix-1.0.0-beta.7.3.dmg)
 
-After manual download, Windows users should run PowerShell as administrator and use `Unblock-File` on the downloaded file before running it. macOS users should run `xattr -d com.apple.quarantine anymatix-1.0.0-beta.7.2.dmg` to remove quarantine flags before opening the DMG.
+After manual download, Windows users should run PowerShell as administrator and use `Unblock-File` on the downloaded file before running it. macOS users should run `xattr -d com.apple.quarantine anymatix-1.0.0-beta.7.3.dmg` to remove quarantine flags before opening the DMG.
