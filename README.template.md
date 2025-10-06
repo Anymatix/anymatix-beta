@@ -1,14 +1,16 @@
 Anymatix Beta
 =============
 
+
+**Windows:** [anymatix-{{VERSION}}-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe)
+
+and run anyway when prompted by Windows SmartScreen, or read below if it does not start (because SmartScreen blocks it).
+
 Anymatix beta releases are unsigned, so you need to follow special instructions. Manual download is anyway possible (see below).
 
 Windows
 -------
 
-**Windows:** [anymatix-{{VERSION}}-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe)
-
-and run anyway when prompted by Windows SmartScreen.
 
 Or open PowerShell (Start menu > PowerShell) and paste:
 ```
