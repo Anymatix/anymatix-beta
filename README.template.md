@@ -1,6 +1,8 @@
 Anymatix Beta
 =============
 
+Anymatix beta releases are unsigned, so you need to follow special instructions. Manual download is anyway possible (see below).
+
 Windows
 -------
 Open PowerShell (Start menu > PowerShell) and paste:
