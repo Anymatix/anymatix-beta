@@ -6,6 +6,10 @@ Anymatix Beta
 
 and run anyway when prompted by Windows SmartScreen, or read below if it does not start (because SmartScreen blocks it).
 
+**macOS:** [anymatix-{{VERSION}}.dmg](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}.dmg)
+
+and open anyway when prompted by macOS Gatekeeper, or read below if it does not open (because Gatekeeper blocks it).
+
 Anymatix beta releases are unsigned, so you need to follow special instructions. Manual download is anyway possible (see below).
 
 Windows
