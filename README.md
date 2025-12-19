@@ -1,6 +1,7 @@
-Anymatix Beta
-=============
+BETA 8.1 incoming!
+==================
 
+The next beta release is scheduled for Friday, December 19; please come back in a few days to find the download links.
 
 **Windows:** [anymatix-1.0.0-beta.8.1-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.8.1/anymatix-1.0.0-beta.8.1-setup.exe)
 
