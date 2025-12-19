@@ -2,11 +2,11 @@ Anymatix Beta
 =============
 
 
-**Windows:** [anymatix-1.0.0-beta.7.3-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.3/anymatix-1.0.0-beta.7.3-setup.exe)
+**Windows:** [anymatix-1.0.0-beta.8.1-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.8.1/anymatix-1.0.0-beta.8.1-setup.exe)
 
 and run anyway when prompted by Windows SmartScreen, or read below if it does not start (because SmartScreen blocks it).
 
-**macOS:** [anymatix-1.0.0-beta.7.3.dmg](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.3/anymatix-1.0.0-beta.7.3.dmg)
+**macOS:** [anymatix-1.0.0-beta.8.1.dmg](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.8.1/anymatix-1.0.0-beta.8.1.dmg)
 
 and open anyway when prompted by macOS Gatekeeper, or read below if it does not open (because Gatekeeper blocks it).
 
@@ -18,14 +18,14 @@ Windows
 
 Or open PowerShell (Start menu > PowerShell) and paste:
 ```
-curl.exe -L --progress-bar "https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.3/anymatix-1.0.0-beta.7.3-setup.exe" -o "anymatix-1.0.0-beta.7.3-setup.exe"; Unblock-File "anymatix-1.0.0-beta.7.3-setup.exe"; .\anymatix-1.0.0-beta.7.3-setup.exe
+curl.exe -L --progress-bar "https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.8.1/anymatix-1.0.0-beta.8.1-setup.exe" -o "anymatix-1.0.0-beta.8.1-setup.exe"; Unblock-File "anymatix-1.0.0-beta.8.1-setup.exe"; .\anymatix-1.0.0-beta.8.1-setup.exe
 ```
 
 macOS
 -----
 Open Terminal and paste:
 ```
-curl -LOC- https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.3/anymatix-1.0.0-beta.7.3.dmg && xattr -d com.apple.quarantine anymatix-1.0.0-beta.7.3.dmg 2>/dev/null || true && open anymatix-1.0.0-beta.7.3.dmg
+curl -LOC- https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.8.1/anymatix-1.0.0-beta.8.1.dmg && xattr -d com.apple.quarantine anymatix-1.0.0-beta.8.1.dmg 2>/dev/null || true && open anymatix-1.0.0-beta.8.1.dmg
 ```
 
 Longer explanation
@@ -36,8 +36,8 @@ Manual download
 ---------------
 If you prefer to download manually:
 
-**Windows:** [anymatix-1.0.0-beta.7.3-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.3/anymatix-1.0.0-beta.7.3-setup.exe)
+**Windows:** [anymatix-1.0.0-beta.8.1-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.8.1/anymatix-1.0.0-beta.8.1-setup.exe)
 
-**macOS:** [anymatix-1.0.0-beta.7.3.dmg](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.7.3/anymatix-1.0.0-beta.7.3.dmg)
+**macOS:** [anymatix-1.0.0-beta.8.1.dmg](https://github.com/Anymatix/anymatix-beta/releases/download/v1.0.0-beta.8.1/anymatix-1.0.0-beta.8.1.dmg)
 
-After manual download, Windows users should run PowerShell as administrator and use `Unblock-File` on the downloaded file before running it. macOS users should run `xattr -d com.apple.quarantine anymatix-1.0.0-beta.7.3.dmg` to remove quarantine flags before opening the DMG.
+After manual download, Windows users should run PowerShell as administrator and use `Unblock-File` on the downloaded file before running it. macOS users should run `xattr -d com.apple.quarantine anymatix-1.0.0-beta.8.1.dmg` to remove quarantine flags before opening the DMG.
