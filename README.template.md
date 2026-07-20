@@ -2,13 +2,18 @@ Anymatix Beta
 =============
 
 
-**Windows:** [anymatix-{{VERSION}}-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe)
+**Windows (untested):** [anymatix-{{VERSION}}-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe)
 
 and run anyway when prompted by Windows SmartScreen, or read below if it does not start (because SmartScreen blocks it).
 
 **macOS:** [anymatix-{{VERSION}}.dmg](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}.dmg)
 
 and open anyway when prompted by macOS Gatekeeper, or read below if it does not open (because Gatekeeper blocks it).
+
+**Linux (untested):** [anymatix-{{VERSION}}.AppImage](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}.AppImage) · [anymatix-{{VERSION}}.deb](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}.deb)
+
+Windows and Linux builds are **untested**. Please report problems on this repository:
+https://github.com/Anymatix/anymatix-beta/issues
 
 Anymatix beta releases are unsigned, so you need to follow special instructions. Manual download is anyway possible (see below).
 
@@ -28,6 +33,15 @@ Open Terminal and paste:
 curl -LOC- https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}.dmg && xattr -d com.apple.quarantine anymatix-{{VERSION}}.dmg 2>/dev/null || true && open anymatix-{{VERSION}}.dmg
 ```
 
+Linux
+-----
+Download the AppImage, mark it executable, and run:
+```
+curl -LOC- https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}.AppImage && chmod +x anymatix-{{VERSION}}.AppImage && ./anymatix-{{VERSION}}.AppImage
+```
+
+Or install the `.deb` on Debian/Ubuntu-based systems.
+
 Longer explanation
 ------------------
 These beta releases are unsigned, so your system will show security warnings. Windows requires PowerShell's Unblock-File to remove download restrictions. macOS requires a script to remove quarantine flags. The one-liners above handle this automatically.
@@ -36,8 +50,14 @@ Manual download
 ---------------
 If you prefer to download manually:
 
-**Windows:** [anymatix-{{VERSION}}-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe)
+**Windows (untested):** [anymatix-{{VERSION}}-setup.exe](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}-setup.exe)
 
 **macOS:** [anymatix-{{VERSION}}.dmg](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}.dmg)
 
+**Linux (untested):** [anymatix-{{VERSION}}.AppImage](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}.AppImage) · [anymatix-{{VERSION}}.deb](https://github.com/Anymatix/anymatix-beta/releases/download/v{{VERSION}}/anymatix-{{VERSION}}.deb)
+
 After manual download, Windows users should run PowerShell as administrator and use `Unblock-File` on the downloaded file before running it. macOS users should run `xattr -d com.apple.quarantine anymatix-{{VERSION}}.dmg` to remove quarantine flags before opening the DMG.
+
+Issues
+------
+Report bugs against the public binaries here: https://github.com/Anymatix/anymatix-beta/issues
