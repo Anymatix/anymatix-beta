@@ -11,7 +11,7 @@ The system ensures that the README.md always reflects the correct version for re
 - **README.template.md** - Template file with `{{VERSION}}` placeholders
 - **generate-readme.js** - Node.js script for generating README
 - **package.json** - NPM configuration with scripts
-- **README.md** - Generated output file (do not edit manually)
+- **README.md** - Generated output file (do not edit manually; edit README.template.md)
 
 ## Usage
 
