@@ -46,7 +46,7 @@ After downloading by hand you still have to clear the flag yourself:
 - **Windows:** in PowerShell, `Unblock-File ~\Downloads\anymatix-*-setup.exe` then run it.
 
 <!--
-  This template no longer carries a {{VERSION}} placeholder, and that is the
+  This template no longer carries a 1.0.0-beta.12 placeholder, and that is the
   point: the install one-liners ask the GitHub releases API for whatever the
   latest release is, so nothing on this page goes stale between releases.
   `generate-readme.js` still runs at publish time and is now a copy, which is
