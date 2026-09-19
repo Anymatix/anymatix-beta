@@ -47,6 +47,7 @@ need() {
 terms_gate() {
   if [ "${ANYMATIX_ACCEPT_TERMS:-}" = "1" ]; then
     step "Beta Tester Voluntary Contributor Agreement"
+    say "    the terms: ${AGREEMENT_URL}"
     say "    accepted automatically (ANYMATIX_ACCEPT_TERMS=1)."
     return 0
   fi

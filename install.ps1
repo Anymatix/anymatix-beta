@@ -46,6 +46,7 @@ function Die  { param($Message) Write-Host ""; Write-Host "Anymatix installer: $
 function Test-TermsGate {
     if ($env:ANYMATIX_ACCEPT_TERMS -eq '1') {
         Step 'Beta Tester Voluntary Contributor Agreement'
+        Say "the terms: $AgreementUrl"
         Say 'accepted automatically (ANYMATIX_ACCEPT_TERMS=1).'
         return
     }
