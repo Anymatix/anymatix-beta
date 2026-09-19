@@ -15,6 +15,15 @@
 # installer - the beta builds are unsigned, and clearing the zone mark is what
 # keeps that warning to one click instead of a refusal.
 #
+# Before it downloads anything it asks you to accept the Beta Tester Voluntary
+# Contributor Agreement (the terms of the beta), and prints the URL where the
+# same text lives online. Press Enter to accept, or type cancel to refuse - a
+# refusal exits without downloading anything. For unattended runs (CI, a
+# provisioning script) where nobody is at the prompt to answer, set
+# $env:ANYMATIX_ACCEPT_TERMS = '1' to accept the agreement non-interactively;
+# with no terminal to ask on, the script otherwise refuses by default rather
+# than guessing.
+#
 # Maintained in the anymatix superproject and published from there to
 # github.com/Anymatix/anymatix-beta. Edit it there, not here.
 
@@ -26,10 +35,45 @@ $ProgressPreference = 'SilentlyContinue'   # the built-in progress bar makes Inv
 
 $Repo = 'Anymatix/anymatix-beta'
 $Api  = "https://api.github.com/repos/$Repo/releases/latest"
+$AgreementUrl = 'https://anymatix-2925e.web.app/beta-agreement'
 
 function Say  { param($Message) Write-Host "    $Message" }
 function Step { param($Message) Write-Host ""; Write-Host "==> $Message" }
 function Die  { param($Message) Write-Host ""; Write-Host "Anymatix installer: $Message" -ForegroundColor Red; exit 1 }
+
+# ------------------------------------------------------------------- terms ---
+
+function Test-TermsGate {
+    if ($env:ANYMATIX_ACCEPT_TERMS -eq '1') {
+        Step 'Beta Tester Voluntary Contributor Agreement'
+        Say 'accepted automatically (ANYMATIX_ACCEPT_TERMS=1).'
+        return
+    }
+
+    Step 'Beta Tester Voluntary Contributor Agreement'
+    Say "read the terms: $AgreementUrl"
+    Say ''
+    Say '============================================================'
+    Say 'PRESS ENTER IF YOU ACCEPT THE TERMS, OR TYPE cancel TO REFUSE'
+    Say '============================================================'
+
+    if (-not [Environment]::UserInteractive) {
+        Die "no terminal to ask for consent on (this looks like a non-interactive run, e.g. CI) - refusing by default. Terms refused. Nothing was downloaded. To automate this, accept the agreement above and re-run with `$env:ANYMATIX_ACCEPT_TERMS = '1'`."
+    }
+
+    while ($true) {
+        try {
+            $Reply = Read-Host '>'
+        } catch {
+            Die 'Terms refused. Nothing was downloaded.'
+        }
+        if ([string]::IsNullOrEmpty($Reply)) { return }
+        if ($Reply.Trim().ToLowerInvariant() -eq 'cancel') { Die 'Terms refused. Nothing was downloaded.' }
+        Say 'please press Enter to accept, or type cancel to refuse.'
+    }
+}
+
+Test-TermsGate
 
 # ---------------------------------------------------------------- platform ---
 

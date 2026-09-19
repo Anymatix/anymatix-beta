@@ -16,6 +16,15 @@
 # It never asks for a password, never runs sudo, and writes only inside the
 # download directory it creates.
 #
+# Before it downloads anything it asks you to accept the Beta Tester Voluntary
+# Contributor Agreement (the terms of the beta), and prints the URL where the
+# same text lives online. Press Enter to accept, or type cancel to refuse — a
+# refusal exits without downloading anything. For unattended runs (CI, a
+# provisioning script) where nobody is at the prompt to answer, set
+# ANYMATIX_ACCEPT_TERMS=1 to accept the agreement non-interactively; with no
+# terminal to ask on, the script otherwise refuses by default rather than
+# guessing.
+#
 # Maintained in the anymatix superproject and published from there to
 # github.com/Anymatix/anymatix-beta. Edit it there, not here.
 
@@ -23,6 +32,7 @@ set -eu
 
 REPO="Anymatix/anymatix-beta"
 API="https://api.github.com/repos/${REPO}/releases/latest"
+AGREEMENT_URL="https://anymatix-2925e.web.app/beta-agreement"
 
 say()  { printf '%s\n' "$*"; }
 step() { printf '\n==> %s\n' "$*"; }
@@ -31,6 +41,47 @@ die()  { printf '\nAnymatix installer: %s\n' "$*" >&2; exit 1; }
 need() {
   command -v "$1" >/dev/null 2>&1 || die "this needs \`$1\`, which is not installed. Install $1 and run the command again."
 }
+
+# ------------------------------------------------------------------- terms ---
+
+terms_gate() {
+  if [ "${ANYMATIX_ACCEPT_TERMS:-}" = "1" ]; then
+    step "Beta Tester Voluntary Contributor Agreement"
+    say "    accepted automatically (ANYMATIX_ACCEPT_TERMS=1)."
+    return 0
+  fi
+
+  step "Beta Tester Voluntary Contributor Agreement"
+  say "    read the terms: ${AGREEMENT_URL}"
+  say ""
+  say "    ============================================================"
+  say "    PRESS ENTER IF YOU ACCEPT THE TERMS, OR TYPE cancel TO REFUSE"
+  say "    ============================================================"
+
+  if ! { exec 3</dev/tty; } 2>/dev/null; then
+    die "no terminal to ask for consent on (this looks like a non-interactive run, e.g. CI) — refusing by default. Terms refused. Nothing was downloaded. To automate this, accept the agreement above and re-run with ANYMATIX_ACCEPT_TERMS=1."
+  fi
+
+  trap 'printf "\nAnymatix installer: Terms refused. Nothing was downloaded.\n" >&2; exit 1' INT
+
+  while true; do
+    printf '> ' > /dev/tty
+    if ! IFS= read -r REPLY <&3; then
+      printf "\nAnymatix installer: Terms refused. Nothing was downloaded.\n" >&2
+      exit 1
+    fi
+    case "$REPLY" in
+      "") break ;;
+      [Cc][Aa][Nn][Cc][Ee][Ll]) printf "\nAnymatix installer: Terms refused. Nothing was downloaded.\n" >&2; exit 1 ;;
+      *) say "    please press Enter to accept, or type cancel to refuse." ;;
+    esac
+  done
+
+  trap - INT
+  exec 3<&-
+}
+
+terms_gate
 
 # ---------------------------------------------------------------- platform ---
 

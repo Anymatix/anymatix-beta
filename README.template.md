@@ -25,6 +25,12 @@ It asks GitHub for the latest Anymatix release, downloads the file for your
 system, clears the flag your system puts on anything downloaded, and opens it.
 No version is written into the command, so it never goes stale.
 
+Before any of that it shows the [Beta Tester Voluntary Contributor Agreement](https://anymatix-2925e.web.app/beta-agreement)
+and asks you to accept it — press Enter to accept, or type `cancel` to refuse
+and exit without downloading anything. For unattended runs, set
+`ANYMATIX_ACCEPT_TERMS=1` (`$env:ANYMATIX_ACCEPT_TERMS = '1'` on Windows) to
+accept non-interactively.
+
 Anymatix beta builds are **unsigned**. That is the whole reason the flag has to
 be cleared: macOS Gatekeeper and Windows SmartScreen both refuse an unsigned
 download until you say otherwise. Nothing in these scripts needs a password, and
