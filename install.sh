@@ -5,10 +5,21 @@
 #
 # What it does: asks GitHub for the LATEST Anymatix release, picks the asset
 # that matches this operating system and processor, downloads it into a
-# directory of its own, clears the quarantine flag macOS puts on anything
+# directory of its own, VERIFIES ITS SHA-256 against the SHA256SUMS.txt the
+# release publishes, clears the quarantine flag macOS puts on anything
 # downloaded, and opens it. It installs nothing by itself — on macOS the disk
 # image opens and you drag Anymatix to Applications, which is the same gesture
 # as any other Mac app.
+#
+# The checksum is not a nicety, it is the only check that can be trusted. The
+# download resumes an interrupted attempt, and on 2026-09-20 a part-file left
+# by a DIFFERENT build of the same version was resumed to exactly the right
+# total size: the size check passed, the disk image was corrupt, and hdiutil
+# refused it with a CRC error. Size says how much arrived; only the hash says
+# WHAT arrived. So: a file whose hash does not match the published one is
+# deleted and fetched once more from scratch, and if the release publishes no
+# SHA256SUMS.txt — or no line for this file — the script refuses rather than
+# hand over something it cannot verify.
 #
 # No version is written down anywhere in this file. The release it fetches is
 # whatever /releases/latest returns on the day you run it.
@@ -161,6 +172,39 @@ fi
 FILENAME="$(basename "$URL")"
 say "    asset:          ${FILENAME}"
 
+# ----------------------------------------------------------------- checksum ---
+
+# Resolved BEFORE the download: refusing after half a gigabyte has arrived
+# would be rude, and there is nothing this script can do with an unverifiable
+# asset except refuse it.
+if command -v shasum >/dev/null 2>&1; then
+  sha256_of() { shasum -a 256 "$1" | cut -d' ' -f1; }
+elif command -v sha256sum >/dev/null 2>&1; then
+  sha256_of() { sha256sum "$1" | cut -d' ' -f1; }
+else
+  die "this needs \`shasum\` or \`sha256sum\` to verify the download, and neither is installed. Install one of them and run the command again."
+fi
+
+SUMS_URL="$(printf '%s' "$RELEASE_JSON" \
+  | tr ',' '\n' \
+  | sed -n 's/.*"browser_download_url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+  | grep -E '/SHA256SUMS\.txt$' \
+  | head -n 1)"
+
+step "Asking GitHub for the published checksums"
+
+[ -n "$SUMS_URL" ] || die "release ${TAG} publishes no SHA256SUMS.txt, so there is nothing to verify ${FILENAME} against. Refusing to install an unverified download. Report this — a release without checksums is a mistake in the release, not on your machine."
+
+SUMS="$(curl -fsSL "$SUMS_URL")" \
+  || die "could not fetch the published checksums from ${SUMS_URL}. Refusing to install an unverified download. Check the network and run the command again."
+
+EXPECTED_SHA="$(printf '%s\n' "$SUMS" \
+  | awk -v want="$FILENAME" '{ name = $NF; sub(/^\*/, "", name); if (name == want) { print $1; exit } }')"
+
+[ -n "$EXPECTED_SHA" ] || die "SHA256SUMS.txt for release ${TAG} has no line for ${FILENAME}, so this download cannot be verified. Refusing to install an unverified download. Report this — the release is incomplete."
+
+say "    published sha256: ${EXPECTED_SHA}"
+
 # ----------------------------------------------------------------- download ---
 
 DOWNLOAD_DIR="${HOME}/Downloads"
@@ -173,15 +217,9 @@ say "    this is a large file — half a gigabyte or so. It will take a while."
 
 mkdir -p "$TARGET_DIR"
 
-# -C - resumes a download interrupted earlier. --fail makes a 404 an error
-# instead of a saved HTML page.
-curl -fL --progress-bar -C - -o "$TARGET" "$URL" \
-  || die "the download did not complete. Run the same command again — it resumes from where it stopped."
-
-[ -s "$TARGET" ] || die "the downloaded file is empty. Delete ${TARGET} and run the command again."
-
-# A truncated download is the failure this catches: curl exits 0 on a connection
-# that closed cleanly mid-file, so compare against the size GitHub advertised.
+# The size GitHub advertised. It is the cheap first signal — it catches a
+# truncated download (curl exits 0 on a connection that closed cleanly
+# mid-file) without hashing half a gigabyte — but it is never the last word.
 EXPECTED_SIZE="$(printf '%s' "$RELEASE_JSON" \
   | tr ',' '\n' \
   | awk -v want="\"${FILENAME}\"" '
@@ -189,13 +227,56 @@ EXPECTED_SIZE="$(printf '%s' "$RELEASE_JSON" \
       seen && /"size"[[:space:]]*:/   { gsub(/[^0-9]/, ""); if (length($0)) { print; exit } }
     ')"
 
-if [ -n "${EXPECTED_SIZE:-}" ]; then
-  ACTUAL_SIZE="$(wc -c < "$TARGET" | tr -d ' ')"
-  if [ "$ACTUAL_SIZE" != "$EXPECTED_SIZE" ]; then
-    die "the download is incomplete: ${ACTUAL_SIZE} bytes of ${EXPECTED_SIZE}. Run the same command again to resume."
+# Two attempts at most: the first may resume whatever is already on disk, the
+# second always starts from nothing. A file that fails the checksum twice is
+# not a download problem, and saying so is more use than resuming forever.
+ATTEMPT=1
+while : ; do
+  if [ "$ATTEMPT" = 1 ]; then
+    # -C - resumes a download interrupted earlier. --fail makes a 404 an error
+    # instead of a saved HTML page.
+    curl -fL --progress-bar -C - -o "$TARGET" "$URL" \
+      || die "the download did not complete. Run the same command again — it resumes from where it stopped."
+  else
+    rm -f "$TARGET"
+    curl -fL --progress-bar -o "$TARGET" "$URL" \
+      || die "the second download did not complete either. Delete ${TARGET} and run the same command again."
   fi
-  say "    downloaded ${ACTUAL_SIZE} bytes, which is the whole file."
-fi
+
+  PROBLEM=""
+  if [ ! -s "$TARGET" ]; then
+    PROBLEM="the downloaded file is empty"
+  else
+    ACTUAL_SIZE="$(wc -c < "$TARGET" | tr -d ' ')"
+    if [ -n "${EXPECTED_SIZE:-}" ] && [ "$ACTUAL_SIZE" != "$EXPECTED_SIZE" ]; then
+      PROBLEM="the file is ${ACTUAL_SIZE} bytes where release ${TAG} says ${EXPECTED_SIZE}"
+    else
+      if [ -n "${EXPECTED_SIZE:-}" ]; then
+        say "    downloaded ${ACTUAL_SIZE} bytes, which is the whole file."
+      fi
+
+      step "Verifying the download against the published checksum"
+      ACTUAL_SHA="$(sha256_of "$TARGET")"
+      if [ "$ACTUAL_SHA" = "$EXPECTED_SHA" ]; then
+        say "    checksum verified: sha256 ${ACTUAL_SHA} matches the published SHA256SUMS.txt."
+        break
+      fi
+      PROBLEM="this file does NOT match the published checksum — its sha256 is ${ACTUAL_SHA}, and release ${TAG} publishes ${EXPECTED_SHA}"
+    fi
+  fi
+
+  if [ "$ATTEMPT" = 1 ]; then
+    say ""
+    say "    ${PROBLEM}."
+    say "    A resumed download can reach exactly the right size and still be the"
+    say "    wrong bytes — a part-file left by another build of the same version is"
+    say "    all it takes. Deleting it and downloading once more from scratch."
+    ATTEMPT=2
+    continue
+  fi
+
+  die "${PROBLEM} — and that was a fresh download, not a resumed one. Nothing was installed. Delete ${TARGET} and try again; if it happens twice more, something between you and GitHub is altering the file (a proxy or a captive portal will do this), so download it by hand from https://github.com/${REPO}/releases/latest and check its sha256 against SHA256SUMS.txt yourself."
+done
 
 # ------------------------------------------------------------------- unlock ---
 

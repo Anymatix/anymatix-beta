@@ -22,8 +22,18 @@ What the line does
 ------------------
 
 It asks GitHub for the latest Anymatix release, downloads the file for your
-system, clears the flag your system puts on anything downloaded, and opens it.
-No version is written into the command, so it never goes stale.
+system, **checks that file's SHA-256 against the `SHA256SUMS.txt` published
+with the release**, clears the flag your system puts on anything downloaded,
+and opens it. No version is written into the command, so it never goes stale.
+
+The checksum is the check that matters, and the script prints the line saying
+it matched. A download that is the right *size* can still be the wrong *bytes*
+— an interrupted attempt is resumed, and a leftover part-file from an earlier
+build of the same version can be completed to exactly the right length. If the
+hash does not match, the file is deleted and fetched once more from scratch; if
+it still does not match, or the release publishes no checksums at all, the
+script refuses and installs nothing rather than open a file it cannot vouch
+for.
 
 Before any of that it shows the [Beta Tester Voluntary Contributor Agreement](https://anymatix-2925e.web.app/beta-agreement)
 and asks you to accept it — press Enter to accept, or type `cancel` to refuse
@@ -50,6 +60,13 @@ After downloading by hand you still have to clear the flag yourself:
 
 - **macOS:** `xattr -d com.apple.quarantine ~/Downloads/anymatix-*.dmg` then open the disk image.
 - **Windows:** in PowerShell, `Unblock-File ~\Downloads\anymatix-*-setup.exe` then run it.
+
+And check what you downloaded, which the one-liner would have done for you.
+Every release carries a `SHA256SUMS.txt`; the number your machine prints must
+be the number on the line for your file:
+
+- **macOS / Linux:** `shasum -a 256 ~/Downloads/anymatix-*.dmg`
+- **Windows:** `Get-FileHash ~\Downloads\anymatix-*-setup.exe -Algorithm SHA256`
 
 <!--
   This template no longer carries a {{VERSION}} placeholder, and that is the

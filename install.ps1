@@ -3,9 +3,20 @@
 #   irm https://raw.githubusercontent.com/Anymatix/anymatix-beta/main/install.ps1 | iex
 #
 # What it does: asks GitHub for the LATEST Anymatix release, picks the installer
-# that matches this processor, downloads it into a directory of its own, clears
+# that matches this processor, downloads it into a directory of its own,
+# VERIFIES ITS SHA-256 against the SHA256SUMS.txt the release publishes, clears
 # the internet-zone mark Windows puts on anything downloaded, and runs the
 # installer. The installer itself is what asks where Anymatix goes.
+#
+# The checksum is not a nicety, it is the only check that can be trusted. Size
+# says how much arrived; only the hash says WHAT arrived. On 2026-09-20 the
+# macOS script handed over a corrupt disk image that was exactly the right
+# number of bytes - a part-file left by a DIFFERENT build of the same version,
+# completed by a resumed download - and the size check saw nothing wrong. So: a
+# file whose hash does not match the published one is deleted and fetched once
+# more from scratch, and if the release publishes no SHA256SUMS.txt - or no
+# line for this file - the script refuses rather than hand over something it
+# cannot verify.
 #
 # No version is written down anywhere in this file. The release it fetches is
 # whatever /releases/latest returns on the day you run it.
@@ -122,6 +133,41 @@ if (-not $Asset) {
 
 Say "asset:          $($Asset.name)"
 
+# ----------------------------------------------------------------- checksum ---
+
+# Resolved BEFORE the download: refusing after a quarter of a gigabyte has
+# arrived would be rude, and there is nothing this script can do with an
+# unverifiable asset except refuse it.
+Step 'Asking GitHub for the published checksums'
+
+$SumsAsset = $Release.assets | Where-Object { $_.name -eq 'SHA256SUMS.txt' } | Select-Object -First 1
+
+if (-not $SumsAsset) {
+    Die "release $Tag publishes no SHA256SUMS.txt, so there is nothing to verify $($Asset.name) against. Refusing to install an unverified download. Report this - a release without checksums is a mistake in the release, not on your machine."
+}
+
+try {
+    $SumsText = (Invoke-WebRequest -Uri $SumsAsset.browser_download_url -UseBasicParsing -Headers @{ 'User-Agent' = 'anymatix-installer' }).Content
+    if ($SumsText -is [byte[]]) { $SumsText = [System.Text.Encoding]::UTF8.GetString($SumsText) }
+} catch {
+    Die "could not fetch the published checksums from $($SumsAsset.browser_download_url). Refusing to install an unverified download. Check the network and run the command again. ($($_.Exception.Message))"
+}
+
+$ExpectedSha = $null
+foreach ($Line in ($SumsText -split "`r?`n")) {
+    $Fields = $Line.Trim() -split '\s+'
+    if ($Fields.Count -ge 2) {
+        $Name = $Fields[-1].TrimStart('*')
+        if ($Name -eq $Asset.name) { $ExpectedSha = $Fields[0].ToLowerInvariant(); break }
+    }
+}
+
+if (-not $ExpectedSha) {
+    Die "SHA256SUMS.txt for release $Tag has no line for $($Asset.name), so this download cannot be verified. Refusing to install an unverified download. Report this - the release is incomplete."
+}
+
+Say "published sha256: $ExpectedSha"
+
 # ----------------------------------------------------------------- download ---
 
 $DownloadRoot = Join-Path $env:USERPROFILE 'Downloads'
@@ -134,23 +180,58 @@ Say 'this is a large file - half a gigabyte or so. It will take a while.'
 
 New-Item -ItemType Directory -Force -Path $TargetDir | Out-Null
 
-try {
-    Invoke-WebRequest -Uri $Asset.browser_download_url -OutFile $Target -UseBasicParsing -Headers @{ 'User-Agent' = 'anymatix-installer' }
-} catch {
-    Die "the download did not complete. Run the same command again. ($($_.Exception.Message))"
-}
+# Two attempts at most. A file that fails the checksum twice is not a download
+# problem, and saying so is more use than fetching it forever.
+$Attempt = 1
+while ($true) {
+    if ($Attempt -gt 1) {
+        Step 'Downloading again, from scratch'
+        Remove-Item -LiteralPath $Target -Force -ErrorAction SilentlyContinue
+    }
 
-if (-not (Test-Path -LiteralPath $Target)) {
-    Die "the download produced no file at $Target."
-}
+    try {
+        Invoke-WebRequest -Uri $Asset.browser_download_url -OutFile $Target -UseBasicParsing -Headers @{ 'User-Agent' = 'anymatix-installer' }
+    } catch {
+        if ($Attempt -gt 1) {
+            Die "the second download did not complete either. Delete $Target and run the same command again. ($($_.Exception.Message))"
+        }
+        Die "the download did not complete. Run the same command again. ($($_.Exception.Message))"
+    }
 
-# A connection that closes cleanly mid-file leaves a short file and no error, so
-# compare against the size GitHub advertised rather than trusting the exit.
-$Actual = (Get-Item -LiteralPath $Target).Length
-if ($Asset.size -and $Actual -ne $Asset.size) {
-    Die "the download is incomplete: $Actual bytes of $($Asset.size). Delete $Target and run the same command again."
+    $Problem = $null
+    if (-not (Test-Path -LiteralPath $Target)) {
+        $Problem = "the download produced no file at $Target"
+    } else {
+        # The cheap first signal: a connection that closes cleanly mid-file
+        # leaves a short file and no error. It is never the last word.
+        $Actual = (Get-Item -LiteralPath $Target).Length
+        if ($Asset.size -and $Actual -ne $Asset.size) {
+            $Problem = "the file is $Actual bytes where release $Tag says $($Asset.size)"
+        } else {
+            Say "downloaded $Actual bytes, which is the whole file."
+
+            Step 'Verifying the download against the published checksum'
+            $ActualSha = (Get-FileHash -LiteralPath $Target -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($ActualSha -eq $ExpectedSha) {
+                Say "checksum verified: sha256 $ActualSha matches the published SHA256SUMS.txt."
+                break
+            }
+            $Problem = "this file does NOT match the published checksum - its sha256 is $ActualSha, and release $Tag publishes $ExpectedSha"
+        }
+    }
+
+    if ($Attempt -eq 1) {
+        Say ''
+        Say "$Problem."
+        Say 'A file can reach exactly the right size and still be the wrong bytes -'
+        Say 'a leftover from another build of the same version is all it takes.'
+        Say 'Deleting it and downloading once more from scratch.'
+        $Attempt = 2
+        continue
+    }
+
+    Die "$Problem - and that was a fresh download. Nothing was installed. Delete $Target and try again; if it happens twice more, something between you and GitHub is altering the file (a proxy or a captive portal will do this), so download it by hand from https://github.com/$Repo/releases/latest and check its SHA-256 against SHA256SUMS.txt yourself with: Get-FileHash <file> -Algorithm SHA256"
 }
-Say "downloaded $Actual bytes, which is the whole file."
 
 # ------------------------------------------------------------------- unlock ---
 
