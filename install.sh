@@ -529,7 +529,7 @@ if [ "$PLATFORM" != "macOS" ]; then
     say "    using the copy Anymatix ships, for Anymatix only — no root, nothing system-wide."
     FUSE_LIB_DIR="${LINUX_HOME}/lib"
     mkdir -p "$FUSE_LIB_DIR"
-    if curl -fsSL "https://raw.githubusercontent.com/${REPO}/${REF}/lib/${_LIB_ARCH}/libfuse.so.2" -o "${FUSE_LIB_DIR}/libfuse.so.2.part" \
+    if curl -fsSL "https://raw.githubusercontent.com/${REPO}/${REF}/lib/${_LIB_ARCH}/libfuse.so.2" -o "${FUSE_LIB_DIR}/libfuse.so.2.part" 2>/dev/null \
       && [ "$(sha256_of "${FUSE_LIB_DIR}/libfuse.so.2.part")" = "$_LIB_SHA" ]; then
       mv -f "${FUSE_LIB_DIR}/libfuse.so.2.part" "${FUSE_LIB_DIR}/libfuse.so.2"
     else
