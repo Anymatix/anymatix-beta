@@ -107,7 +107,7 @@ be the number on the line for your file:
 - **Windows:** `Get-FileHash ~\Downloads\anymatix-*-setup.exe -Algorithm SHA256`
 
 <!--
-  This template no longer carries a {{VERSION}} placeholder, and that is the
+  This template no longer carries a 1.0.0-beta.13 placeholder, and that is the
   point: the install one-liners ask the GitHub releases API for whatever the
   latest release is, so nothing on this page goes stale between releases.
   `generate-readme.js` still runs at publish time and is now a copy, which is
