@@ -66,6 +66,8 @@
 #   --delete-download    delete the downloaded disk image once the install has
 #                        succeeded. By default it is KEPT, and the script says
 #                        where, so a reinstall costs nothing.
+#   --appimage <file>    Linux: install an AppImage you already have, the same
+#                        way (--dmg's rules apply: no checksum gate on it).
 #   --dmg <file>         install a disk image you already have instead of
 #                        downloading one. The download's checksum gate belongs
 #                        to the download: a file you pointed at yourself is
@@ -79,6 +81,9 @@
 set -eu
 
 REPO="Anymatix/anymatix-beta"
+# The branch the Linux FUSE 2 library is fetched from. `main` for everyone;
+# settable only so a change to this script can be tried before it is merged.
+REF="${ANYMATIX_INSTALLER_REF:-main}"
 API="https://api.github.com/repos/${REPO}/releases/latest"
 AGREEMENT_URL="https://anymatix-2925e.web.app/beta-agreement"
 
@@ -101,6 +106,7 @@ usage() {
   say "                       so you can drag Anymatix in yourself"
   say "  --delete-download    delete the disk image after a successful install"
   say "                       (by default it is kept, and the path is printed)"
+  say "  --appimage <file>    Linux: install an AppImage you already have"
   say "  --dmg <file>         install a disk image you already have, instead of"
   say "                       downloading one"
   say "  -h, --help           this list"
@@ -127,6 +133,12 @@ while [ $# -gt 0 ]; do
       shift
       ;;
     --dmg=*)           LOCAL_IMAGE="${1#--dmg=}" ;;
+    --appimage)
+      [ $# -ge 2 ] || die "--appimage needs the path of an AppImage."
+      LOCAL_IMAGE="$2"
+      shift
+      ;;
+    --appimage=*)      LOCAL_IMAGE="${1#--appimage=}" ;;
     -h|--help)         usage; exit 0 ;;
     *)                 die "unknown option \`$1\`. Run with --help for the list." ;;
   esac
@@ -199,7 +211,10 @@ case "$OS" in
     ;;
   Linux)
     PLATFORM="Linux"
-    [ -z "$LOCAL_IMAGE" ] || die "--dmg is a macOS disk image, and this is Linux."
+    case "$LOCAL_IMAGE" in
+      ''|*.AppImage) ;;
+      *) die "on Linux, point --appimage at an .AppImage file (--dmg is a macOS disk image)." ;;
+    esac
     case "$ARCH" in
       x86_64|amd64)  ASSET_PATTERN='x86_64\.AppImage$|amd64\.AppImage$|\.AppImage$' ;;
       aarch64|arm64) ASSET_PATTERN='aarch64\.AppImage$|arm64\.AppImage$' ;;
@@ -446,12 +461,127 @@ fi
 
 # ------------------------------------------------------------------- Linux ---
 
+# THE APPIMAGE GOES TO A PATH WITH NO VERSION IN IT. The app updates itself by
+# replacing the file it was started from; a name carrying the version makes
+# the updater write a NEW file and delete the old one, which would strand the
+# launcher below on a path that no longer exists.
+#
+# FUSE 2. AppImages mount themselves with libfuse.so.2, which Ubuntu 22.04 and
+# later no longer install ("dlopen(): error loading libfuse.so.2" and the app
+# never opens — measured on Ubuntu 26.04, 2026-09-25). In order:
+#   1. the system has libfuse.so.2        -> nothing extra;
+#   2. it does not                         -> our copy (lib/, checksummed here),
+#      handed to this app alone through the launcher's LD_LIBRARY_PATH — no
+#      root, nothing system-wide, and updates keep working;
+#   3. even that cannot mount the image    -> unpack it and run it unpacked,
+#      and say plainly that it will then NOT update itself.
 if [ "$PLATFORM" != "macOS" ]; then
-  step "Making the AppImage executable"
-  chmod +x "$TARGET"
+  LINUX_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/anymatix"
+  APPIMAGE_DEST="${LINUX_HOME}/Anymatix.AppImage"
+  LAUNCHER_DIR="${HOME}/.local/bin"
+  LAUNCHER="${LAUNCHER_DIR}/anymatix"
+  mkdir -p "$LINUX_HOME" "$LAUNCHER_DIR" || die "could not create ${LINUX_HOME}."
+
+  step "Installing the AppImage"
+  cp "$TARGET" "${APPIMAGE_DEST}.new" && chmod +x "${APPIMAGE_DEST}.new" \
+    && mv -f "${APPIMAGE_DEST}.new" "$APPIMAGE_DEST" \
+    || die "could not copy the AppImage to ${APPIMAGE_DEST}. The download is still at ${TARGET}."
+  say "    ${APPIMAGE_DEST}"
+
+  # Does it mount? `--appimage-mount` mounts and prints the mount point, then
+  # waits; a line that is a directory is a yes. Run in the background and
+  # stopped either way.
+  appimage_mounts() {
+    _out="$(mktemp)"
+    env LD_LIBRARY_PATH="$1" "$APPIMAGE_DEST" --appimage-mount >"$_out" 2>/dev/null &
+    _pid=$!
+    _i=0; _ok=1
+    while [ "$_i" -lt 20 ]; do
+      _mp="$(head -n 1 "$_out" 2>/dev/null)"
+      if [ -n "$_mp" ] && [ -d "$_mp" ]; then _ok=0; break; fi
+      kill -0 "$_pid" 2>/dev/null || break
+      sleep 0.5; _i=$((_i + 1))
+    done
+    kill "$_pid" 2>/dev/null; wait "$_pid" 2>/dev/null
+    rm -f "$_out"
+    return "$_ok"
+  }
+
+  have_system_fuse2() {
+    ldconfig -p 2>/dev/null | grep -q 'libfuse\.so\.2 ' && return 0
+    for _d in /lib /usr/lib /lib64 /usr/lib64 /lib/*-linux-gnu /usr/lib/*-linux-gnu; do
+      [ -e "${_d}/libfuse.so.2" ] && return 0
+    done
+    return 1
+  }
+
+  FUSE_LIB_DIR=""
+  RUN_MODE="appimage"
+  step "Checking FUSE 2, which AppImages need"
+  if have_system_fuse2; then
+    say "    this system has libfuse.so.2."
+  else
+    case "$ARCH" in
+      x86_64|amd64)  _LIB_ARCH="linux-x86_64";  _LIB_SHA="0c2b629ecbb29c36a8089e15fa69216869494850a7d00710ebe7707dc1b3b828" ;;
+      aarch64|arm64) _LIB_ARCH="linux-aarch64"; _LIB_SHA="01734bd23c8f6f3b5ac7a662c7a5cf6156cdfd1239c0c1cbf44c30cb6d7a3200" ;;
+    esac
+    say "    this system has no libfuse.so.2 (Ubuntu 22.04 and later do not install it)."
+    say "    using the copy Anymatix ships, for Anymatix only — no root, nothing system-wide."
+    FUSE_LIB_DIR="${LINUX_HOME}/lib"
+    mkdir -p "$FUSE_LIB_DIR"
+    if curl -fsSL "https://raw.githubusercontent.com/${REPO}/${REF}/lib/${_LIB_ARCH}/libfuse.so.2" -o "${FUSE_LIB_DIR}/libfuse.so.2.part" \
+      && [ "$(sha256_of "${FUSE_LIB_DIR}/libfuse.so.2.part")" = "$_LIB_SHA" ]; then
+      mv -f "${FUSE_LIB_DIR}/libfuse.so.2.part" "${FUSE_LIB_DIR}/libfuse.so.2"
+    else
+      rm -f "${FUSE_LIB_DIR}/libfuse.so.2.part"
+      say "    could not fetch it, or its checksum did not match."
+      FUSE_LIB_DIR=""
+      RUN_MODE="extract"
+    fi
+  fi
+
+  if [ "$RUN_MODE" = "appimage" ] && ! appimage_mounts "$FUSE_LIB_DIR"; then
+    say "    the AppImage still cannot mount itself here."
+    RUN_MODE="extract"
+  fi
+
+  if [ "$RUN_MODE" = "extract" ]; then
+    step "Unpacking the AppImage instead (no FUSE needed)"
+    say "    NOTE: an unpacked Anymatix does NOT update itself. To update, run this"
+    say "    installer again; or install libfuse2 (e.g. sudo apt install libfuse2t64)"
+    say "    and re-run it to get self-updates back."
+    rm -rf "${LINUX_HOME}/app" "${LINUX_HOME}/squashfs-root"
+    ( cd "$LINUX_HOME" && "$APPIMAGE_DEST" --appimage-extract >/dev/null 2>&1 ) \
+      && mv "${LINUX_HOME}/squashfs-root" "${LINUX_HOME}/app" \
+      || die "could not unpack ${APPIMAGE_DEST}. Install libfuse2 (sudo apt install libfuse2t64 on Ubuntu) and run this installer again."
+  fi
+
+  step "Writing the launcher"
+  if [ "$RUN_MODE" = "extract" ]; then
+    printf '#!/bin/sh\n# Written by the Anymatix installer. Unpacked mode: no self-update.\nAPPDIR="%s" exec "%s/AppRun" "$@"\n' \
+      "${LINUX_HOME}/app" "${LINUX_HOME}/app" > "$LAUNCHER"
+  elif [ -n "$FUSE_LIB_DIR" ]; then
+    printf '#!/bin/sh\n# Written by the Anymatix installer: FUSE 2 for this app only.\nLD_LIBRARY_PATH="%s${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" exec "%s" "$@"\n' \
+      "$FUSE_LIB_DIR" "$APPIMAGE_DEST" > "$LAUNCHER"
+  else
+    printf '#!/bin/sh\n# Written by the Anymatix installer.\nexec "%s" "$@"\n' "$APPIMAGE_DEST" > "$LAUNCHER"
+  fi
+  chmod +x "$LAUNCHER"
+  say "    ${LAUNCHER}"
+
+  APPS_ENTRY_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/applications"
+  mkdir -p "$APPS_ENTRY_DIR" && printf '[Desktop Entry]\nType=Application\nName=Anymatix\nExec=%s %%U\nTerminal=false\nCategories=Graphics;\n' "$LAUNCHER" \
+    > "${APPS_ENTRY_DIR}/anymatix.desktop" && say "    menu entry: ${APPS_ENTRY_DIR}/anymatix.desktop"
 
   step "Done"
-  say "    run it with: ${TARGET}"
+  case ":${PATH}:" in
+    *":${LAUNCHER_DIR}:"*) say "    start it with: anymatix   (or from your applications menu)" ;;
+    *)                     say "    start it with: ${LAUNCHER}   (or from your applications menu)" ;;
+  esac
+  if [ "$DO_LAUNCH" = 1 ] && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
+    nohup "$LAUNCHER" >/dev/null 2>&1 &
+    say "    started."
+  fi
   exit 0
 fi
 
